@@ -339,16 +339,23 @@ class AgentExchangeClient:
                     "positionIdx": 0,
                 })
             elif self.exchange_id == "bitget":
-                ccxt_symbol = self._to_ccxt_symbol(symbol)
                 position = await self.get_position(symbol)
                 if not position:
                     logger.warning(f"No position found to set SL for {symbol}")
                     return False
-                close_side = "sell" if position.side == "LONG" else "buy"
-                await self.exchange.create_order(
-                    ccxt_symbol, "market", close_side, float(position.qty), None,
-                    {"stopLossPrice": float(rounded_sl), "reduceOnly": True}
-                )
+                hold_side = "long" if position.side == "LONG" else "short"
+                await self.exchange.private_mix_post_v2_mix_order_place_tpsl_order({
+                    "symbol": symbol,
+                    "productType": "USDT-FUTURES",
+                    "marginMode": "crossed",
+                    "marginCoin": "USDT",
+                    "planType": "pos_loss",
+                    "triggerPrice": str(rounded_sl),
+                    "triggerType": "fill_price",
+                    "size": "0",
+                    "holdSide": hold_side,
+                    "delegateType": "market",
+                })
             else:
                 ccxt_symbol = self._to_ccxt_symbol(symbol)
                 position = await self.get_position(symbol)
