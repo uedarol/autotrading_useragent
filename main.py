@@ -168,7 +168,7 @@ async def _post_to_central(path: str, payload: dict):
                 },
             )
             if resp.status_code == 200:
-                logger.info(f"[ManualDetect] 콜백 성공: {path}")
+                logger.info("[ManualDetect] 콜백 성공")
             else:
                 logger.warning(f"[ManualDetect] 콜백 실패: HTTP {resp.status_code}")
     except Exception as e:
